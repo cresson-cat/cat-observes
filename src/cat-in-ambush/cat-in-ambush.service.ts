@@ -36,15 +36,19 @@ export class CatInAmbushService {
     const page = await browser.newPage();
     page.context().setDefaultTimeout(60000);
 
-    // アカウント毎に実行 @todo: Promise.all にする
+    // アカウント毎に実行 @todo: Promise.all に変更予定
+    const result = [];
     try {
       for (const target of targets) {
-        await this.execute(page, target, config.downloadPath);
+        const name = `${await this.execute(page, target, config.downloadPath)}`;
+        if (name) result.push(name);
       }
     } finally {
       page.close();
       browser.close();
     }
+
+    return result;
   }
   /**
    * 実行前の準備
@@ -105,10 +109,12 @@ export class CatInAmbushService {
       .click();
 
     // ダウンロード
-    await this.download(afterLogin, downloadPath);
+    const result = await this.download(afterLogin, downloadPath);
 
     // ログアウト
     await this.logout(afterLogin);
+
+    return result;
   };
   /**
    * ログイン
@@ -165,7 +171,7 @@ export class CatInAmbushService {
       const fileName = `${downloadPath}/${download.suggestedFilename()}`;
       await download.saveAs(fileName);
 
-      return fileName;
+      return download.suggestedFilename();
     } catch (e) {
       // throw errorForRethrow('ダウンロードに失敗しました', e);
       console.dir(e);
