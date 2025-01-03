@@ -1,6 +1,6 @@
 import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
-export class Target {
+export class CatFoodDto {
   @IsString()
   @IsNotEmpty()
   name: string;

@@ -1,12 +1,13 @@
 # CAT-OBSERVES
 
-## 本 README は追ってメンテナンスする
+## ＊ 本 README は追ってメンテナンスする
 
-```bash
-[Nest] 66895  - 2024/11/03 16:45:46   ERROR [ExceptionsHandler] page.goto: net::ERR_ABORTED; maybe frame was detached?
-Call log:
-  - navigating to "https://www.bk.mufg.jp/index.html", waiting until "load"
-```
+### メモ
+
+### TODO
+
+- [ ] アカウント毎に実行 Promise.all に変更
+- [ ] エンドポイントは nestjs のパイプ機能でチェックする
 
 <!--
 <p align="center">
