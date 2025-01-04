@@ -9,6 +9,7 @@ import { FirestoreModule } from './firestore/firestore.module';
     CatInAmbushModule,
     ConfigModule.forRoot({
       envFilePath: ['.env.development.local'],
+      isGlobal: true,
     }),
     CatAlarmClockModule,
     FirestoreModule,

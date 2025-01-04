@@ -1,7 +1,7 @@
 export interface DepositAndWithdrawal {
   date: string;
   summary: string;
-  summaryContents: string;
-  depositsAndWithdrawals: number;
+  summary_contents: string;
+  deposits_and_withdrawals: number;
   balance: number;
 }
