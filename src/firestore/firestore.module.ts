@@ -3,7 +3,7 @@ import { UsageHistoryRepository } from './usage-history/usage-history.repository
 import { FirestoreService } from './firestore.service';
 
 @Module({
-  providers: [UsageHistoryRepository, FirestoreService],
+  providers: [FirestoreService, UsageHistoryRepository],
   exports: [UsageHistoryRepository],
 })
 export class FirestoreModule {}
