@@ -45,11 +45,13 @@ export class CatAlarmClockService {
         .on('end', () => {
           forkJoin(records.map(this.saveOneLine)).subscribe({
             next: () => console.log('All registrations successful'),
-            /* ここは stream が内外で2本になっている
-             * 例外処理は全体的に Result 型を導入するかも */
+            /* - この部分は stream が内外で2本になっている（ReadWriteStream / Observable）
+             * - 例外処理は全体的に Result 型を導入した方が良いかも
+             * - throwError 等を使用して throw した時の、アプリの動作を確認した方が良さそう */
             error: (err) => console.error(err),
           });
         })
+        // この部分と合わせてテストした方が良さそう
         .on('error', (err) => {
           console.error('Error:', err);
         });
@@ -80,9 +82,17 @@ export class CatAlarmClockService {
    * @param line 1行
    * @returns 1行毎の登録結果
    */
-  private saveOneLine = async (line: DepositAndWithdrawal, idx: number) => {
-    const { date } = line;
-    const key = `${date.replaceAll('/', '-')}_${idx.toString().padStart(3, '0')}`;
-    return await this.usageHistoryRepository.save(line, key);
+  private saveOneLine = async (line: DepositAndWithdrawal) => {
+    const { date, balance, summary, summary_contents } = line;
+    // <date>_<balance>
+    const firstPart = `${date.replaceAll('/', '-')}_${balance.toString().padStart(7, '0')}`;
+    // <summary>_<summary-content> ※ base64化（"/" は使用不可のため）
+    const base64Encoded = Buffer.from(
+      `${summary}_${summary_contents}`,
+    ).toString('base64');
+    return await this.usageHistoryRepository.save(
+      line,
+      `${firstPart}_${base64Encoded}`,
+    );
   };
 }

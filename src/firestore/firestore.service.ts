@@ -55,6 +55,6 @@ export class FirestoreService {
   async setData<T>(data: T, docId?: string) {
     const collection = this._firestore.collection(this._collectionName);
     const docRef = docId ? collection.doc(docId) : collection.doc();
-    return await docRef.set({ ...data, updated_at: new Date() });
+    return await docRef.set({ ...data, created_at: new Date() });
   }
 }
