@@ -7,6 +7,7 @@ import * as iconv from 'iconv-lite';
 import { DepositAndWithdrawal } from 'src/models/deposit-and-withdrawal.model';
 import { UsageHistoryRepository } from 'src/firestore/usage-history/usage-history.repository';
 import { forkJoin } from 'rxjs';
+import * as base32 from 'thirty-two';
 
 @Injectable()
 export class CatAlarmClockService {
@@ -86,13 +87,12 @@ export class CatAlarmClockService {
     const { date, balance, summary, summary_contents } = line;
     // <date>_<balance>
     const firstPart = `${date.replaceAll('/', '-')}_${balance.toString().padStart(7, '0')}`;
-    // <summary>_<summary-content> ※ base64化（"/" は使用不可のため）
-    const base64Encoded = Buffer.from(
-      `${summary}_${summary_contents}`,
-    ).toString('base64');
+    // <summary>_<summary-content> ※ base32エンコード（"/" を使用しない）
+    const encoded = base32.encode(`${summary}_${summary_contents}`);
+    // 登録
     return await this.usageHistoryRepository.save(
       line,
-      `${firstPart}_${base64Encoded}`,
+      `${firstPart}_${encoded}`,
     );
   };
 }
