@@ -32,7 +32,8 @@
     "iconv-lite": "^0.6.3",
     "reflect-metadata": "^0.2.0",
     "rxjs": "^7.8.1",
-    "swagger-ui-express": "^5.0.1"
+    "swagger-ui-express": "^5.0.1",
+    "thirty-two": "^1.0.2"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.0.0",
