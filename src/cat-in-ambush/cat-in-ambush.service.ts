@@ -32,7 +32,7 @@ export class CatInAmbushService {
     }
   }
 
-  public async ambush() {
+  public async ambush(): Promise<string[]> {
     const config = (() => {
       const num = Number;
       const canDebugBrowser = num.parseInt(this.configService.get('HEADLESS'));
@@ -52,7 +52,7 @@ export class CatInAmbushService {
     this.page = await this.context.newPage();
     this.page.context().setDefaultTimeout(60000);
 
-    const result = [];
+    const result: string[] = [];
     try {
       for (const target of targets) {
         const name = `${await this.execute(target, config.downloadPath)}`;
