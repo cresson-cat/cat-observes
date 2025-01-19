@@ -6,7 +6,10 @@ import * as path from 'node:path';
 import * as iconv from 'iconv-lite';
 import { DepositAndWithdrawal } from 'src/models/deposit-and-withdrawal.model';
 import { UsageHistoryRepository } from 'src/firestore/usage-history/usage-history.repository';
-import { forkJoin } from 'rxjs';
+import * as base32 from 'thirty-two';
+import { concatMap, from, toArray } from 'rxjs';
+import { parse as parseDate, format } from 'date-fns';
+import { TZDate } from '@date-fns/tz';
 
 @Injectable()
 export class CatAlarmClockService {
@@ -33,27 +36,26 @@ export class CatAlarmClockService {
       skip_empty_lines: true,
     });
 
-    for (const f of files) {
-      const records: DepositAndWithdrawal[] = [];
-      const stream = fs
-        .createReadStream(path.join(config.downloadPath, f))
-        .pipe(iconv.decodeStream('Shift_JIS'));
-
-      stream
-        .pipe(parser)
-        .on('data', (row) => records.push(this.parseLine(row)))
-        .on('end', () => {
-          forkJoin(records.map(this.saveOneLine)).subscribe({
-            next: () => console.log('All registrations successful'),
-            /* ここは stream が内外で2本になっている
-             * 例外処理は全体的に Result 型を導入するかも */
-            error: (err) => console.error(err),
-          });
-        })
-        .on('error', (err) => {
-          console.error('Error:', err);
-        });
-    }
+    from(files)
+      .pipe(
+        concatMap((f) => {
+          const stream = fs
+            .createReadStream(path.join(config.downloadPath, f))
+            .pipe(iconv.decodeStream('Shift_JIS'))
+            .pipe(parser);
+          // @note csv の各行をパースした stream を Observable に変換
+          return from(stream);
+        }),
+        concatMap((row: string[]) =>
+          // @note csv の各行を非同期で登録
+          from(this.saveOneLine(this.parseLine(row))),
+        ),
+        toArray(), // @note 全ての this.saveOneLine の結果を配列にまとめる
+      )
+      .subscribe({
+        next: () => console.log('All registrations successful'),
+        error: (err) => console.error('Error:', err),
+      });
   }
 
   /**
@@ -63,8 +65,11 @@ export class CatAlarmClockService {
    */
   public parseLine = (line: string[]): DepositAndWithdrawal => {
     const getAmount = (val: string) => parseFloat(val.replaceAll(',', ''));
+    const refDate = new TZDate(new Date(), 'Asia/Tokyo'); // 基準日（タイムゾーン指定）
+    const date = parseDate(line[0], 'yyyy/M/d', refDate);
+    const formattedDate = format(date, 'yyyyMMdd');
     return {
-      date: line[0],
+      date: parseFloat(formattedDate),
       summary: line[1],
       summary_contents: line[2],
       deposits_and_withdrawals: !!line[3]
@@ -80,9 +85,18 @@ export class CatAlarmClockService {
    * @param line 1行
    * @returns 1行毎の登録結果
    */
-  private saveOneLine = async (line: DepositAndWithdrawal, idx: number) => {
-    const { date } = line;
-    const key = `${date.replaceAll('/', '-')}_${idx.toString().padStart(3, '0')}`;
-    return await this.usageHistoryRepository.save(line, key);
+  private saveOneLine = async (
+    line: DepositAndWithdrawal,
+  ): Promise<FirebaseFirestore.WriteResult> => {
+    const { date, balance, summary, summary_contents } = line;
+    // <date>_<balance>
+    const firstPart = `${date}_${balance.toString().padStart(7, '0')}`;
+    // <summary>_<summary-content> ※ base32エンコード（"/" を使用しない）
+    const encoded = base32.encode(`${summary}_${summary_contents}`);
+    // 登録
+    return await this.usageHistoryRepository.save(
+      line,
+      `${firstPart}_${encoded}`,
+    );
   };
 }
