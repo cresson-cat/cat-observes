@@ -10,7 +10,7 @@ export class CatInAmbushController {
 
   @Post()
   @ApiOperation({ summary: '銀行の取引明細を取得' })
-  @ApiResponse({ status: 200, description: '成功', type: [String] }) // レスポンスの型を指定
+  @ApiResponse({ status: 200, description: '成功', type: [String] })
   public async ambush() {
     return await this.service.ambush();
   }
