@@ -44,7 +44,7 @@ export class CatWarningService {
         .sort((a, b) => a - b)
         .find((threshold) => data.balance <= threshold);
 
-      if (!targetThreshold) {
+      if (targetThreshold) {
         // Slack通知を送信
         await this.slackService.sendSlackMessage(
           `残高が ¥${targetThreshold} より少ない.. 今 ¥${data.balance} にゃん！`,
