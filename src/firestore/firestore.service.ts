@@ -47,6 +47,24 @@ export class FirestoreService {
   }
 
   /**
+   * 最新のデータ取得
+   *
+   * @returns 最新のデータ
+   */
+  public async getLatestData() {
+    const snapshot = await this._firestore
+      .collection(this._collectionName)
+      .orderBy('__name__', 'desc')
+      .limit(1)
+      .get();
+    if (snapshot.empty) {
+      return null;
+    }
+    const doc = snapshot.docs[0];
+    return doc;
+  }
+
+  /**
    * データ登録
    *
    * @param docId ドキュメントID
