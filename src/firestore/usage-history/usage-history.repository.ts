@@ -35,6 +35,15 @@ export class UsageHistoryRepository extends FirestoreService {
   }
 
   /**
+   * 最新のデータ取得
+   *
+   * @returns 最新のデータ
+   */
+  public async fetchRecentHistory() {
+    return await super.getLatestData();
+  }
+
+  /**
    * データ登録
    *
    * @param data データ

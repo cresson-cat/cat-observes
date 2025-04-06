@@ -3,6 +3,8 @@ import { CatInAmbushModule } from './cat-in-ambush/cat-in-ambush.module';
 import { ConfigModule } from '@nestjs/config';
 import { CatAlarmClockModule } from './cat-alarm-clock/cat-alarm-clock.module';
 import { FirestoreModule } from './firestore/firestore.module';
+import { CatWarningModule } from './cat-warning/cat-warning.module';
+import { SlackModule } from './slack/slack.module';
 
 @Module({
   imports: [
@@ -13,6 +15,8 @@ import { FirestoreModule } from './firestore/firestore.module';
     }),
     CatAlarmClockModule,
     FirestoreModule,
+    CatWarningModule,
+    SlackModule,
   ],
   controllers: [],
   providers: [],
