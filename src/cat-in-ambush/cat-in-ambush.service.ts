@@ -34,12 +34,11 @@ export class CatInAmbushService {
 
   public async ambush(): Promise<string[]> {
     const config = (() => {
-      const num = Number;
-      const canDebugBrowser = num.parseInt(this.configService.get('HEADLESS'));
+      const canDebugBrowser = parseInt(this.configService.get('HEADLESS'));
       return {
         beforeParthing: this.configService.get<string>('TARGETS'),
         downloadPath: this.configService.get<string>('DOWNLOAD_PATH'),
-        headless: num.isNaN(canDebugBrowser) ? true : !!canDebugBrowser,
+        headless: isNaN(canDebugBrowser) ? true : !!canDebugBrowser,
       };
     })();
     const targets = await this.setup(config.beforeParthing);
