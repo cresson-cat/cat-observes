@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { FirestoreService } from '../firestore.service';
-import { getCollectionName } from 'src/functions/common';
+import { classNameToSnakeCase } from '../firestore.utils';
 import { WriteResult } from '@google-cloud/firestore';
 import { ConfigService } from '@nestjs/config';
 
@@ -21,7 +21,7 @@ export class UsageHistoryRepository extends FirestoreService {
    */
   constructor(protected readonly configService: ConfigService) {
     super(configService);
-    super.collectionName = getCollectionName(this.constructor.name);
+    super.collectionName = classNameToSnakeCase(this.constructor.name);
   }
 
   /**
