@@ -45,7 +45,7 @@ export class CatInAmbushService {
 
     this.browser = await chromium.launch({
       downloadsPath: config.downloadPath,
-      headless: config.headless,
+      headless: config.headless ?? true, // デフォルトでヘッドレスモードを有効にする
     });
     this.context = await this.browser.newContext();
     this.page = await this.context.newPage();
