@@ -10,7 +10,11 @@ import { SlackModule } from './slack/slack.module';
   imports: [
     CatInAmbushModule,
     ConfigModule.forRoot({
-      envFilePath: ['.env.development.local'],
+      envFilePath:
+        process.env.NODE_ENV === 'development'
+          ? ['.env', '.env.development.local']
+          : ['.env'],
+      ignoreEnvFile: process.env.NODE_ENV !== 'development', // development 環境以外では .env ファイルを無視（環境変数優先）
       isGlobal: true,
     }),
     CatAlarmClockModule,

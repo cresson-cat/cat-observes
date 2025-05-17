@@ -23,7 +23,7 @@ export class FirestoreService {
    */
   constructor(protected readonly configService: ConfigService) {
     const projectId = this.configService.get<string>('CAT_OBSERVES_PJ_ID');
-    const keyFilename = this.configService.get<string>('CAT_OBSERVES_KEY_FILE');
+    const keyFilename = this.configService.get<string>('GCP_KEY_FILE');
     this._firestore = new Firestore({ projectId, keyFilename });
   }
 
