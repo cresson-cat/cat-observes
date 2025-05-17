@@ -12,7 +12,7 @@ import { SlackModule } from './slack/slack.module';
     ConfigModule.forRoot({
       envFilePath:
         process.env.NODE_ENV === 'development'
-          ? ['.env.development.local', '.env']
+          ? ['.env', '.env.development.local']
           : ['.env'],
       ignoreEnvFile: process.env.NODE_ENV !== 'development', // development 環境以外では .env ファイルを無視（環境変数優先）
       isGlobal: true,

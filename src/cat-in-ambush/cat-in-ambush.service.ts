@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 // biome-ignore lint/style/useImportType: <explanation>
 import { ConfigService } from '@nestjs/config';
-import { plainToClass } from 'class-transformer';
+import { plainToClass, plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import { isValidationErrors } from 'src/functions/common';
 import { CatFoodDto } from 'src/models/dto/cat-food.model.dto';
@@ -26,6 +26,14 @@ export class CatInAmbushService {
   ) {}
 
   async onModuleDestroy() {
+    if (this.page) {
+      await this.page.close();
+      this.page = null;
+    }
+    if (this.context) {
+      await this.context.close();
+      this.context = null;
+    }
     if (this.browser) {
       await this.browser.close();
       this.browser = null;
@@ -41,6 +49,7 @@ export class CatInAmbushService {
         headless: isNaN(canDebugBrowser) ? true : !!canDebugBrowser,
       };
     })();
+    // console.log(config);
     const targets = await this.setup(config.beforeParthing);
 
     this.browser = await chromium.launch({
@@ -57,25 +66,36 @@ export class CatInAmbushService {
         const name = `${await this.execute(target, config.downloadPath)}`;
         if (name) result.push(name);
       }
+    } catch (error) {
+      console.error('Error during ambush execution:', error);
+
+      // Firestore関連のエラーを特定するための追加ログ
+      if (error.code === 7) {
+        console.error('Permission denied. Check Firestore credentials and permissions.');
+      }
+
+      throw error; // エラーを再スローして呼び出し元に通知
     } finally {
-      await Promise.all([
-        this.page?.close(),
-        this.context?.close(),
-        this.browser?.close(),
-      ]);
+      await this.onModuleDestroy(); // リソース管理を統一
     }
 
     return result;
   }
 
   private setup = async (beforeParthing: string) => {
-    const targets: CatFoodDto[] = JSON.parse(beforeParthing)
+    const parsedData = JSON.parse(beforeParthing);
+    if (!Array.isArray(parsedData)) {
+      throw new Error('Invalid data format: Expected an array');
+    }
+
+    const targets: CatFoodDto[] = parsedData
       .filter((p) => !!p)
-      .map((t) => plainToClass(CatFoodDto, t));
+      .map((t) => plainToInstance(CatFoodDto, t));
 
-    const errors = await validate(targets);
+    const errors = await Promise.all(targets.map((target) => validate(target)));
+    const flattenedErrors = errors.flat();
 
-    if (isValidationErrors(errors)) {
+    if (isValidationErrors(flattenedErrors)) {
       console.log(
         'Caught promise rejection (validation failed). Errors: ',
         errors,

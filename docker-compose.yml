@@ -3,14 +3,14 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      args:
-        NODE_ENV: ${NODE_ENV} # 環境変数
-        PORT: ${PORT} # 環境変数
     ports:
       - "${PORT}:${PORT}"
+      - "9229:9229"
     volumes:
       - .:/app
-      - /app/node_modules
+      - ./downloads:/home/pwuser/downloads
+      - /Users/kanegadai/.ssh/gcp/cat-observes-1250b9d70c39.json:/app/gcp-key.json
     env_file:
-      - .env.development.local # todo: 開発環境のコンテナ化のため、一時的に追加。あとで消す
-    command: npm run start:dev
+      - .env
+      - .env.development.local
+    command: npm run debug

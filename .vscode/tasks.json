@@ -8,6 +8,18 @@
 			"problemMatcher": [],
 			"label": "npm: start:debug",
 			"detail": "nest start --debug --watch"
-		}
+		},
+		{
+			"type": "typescript",
+			"tsconfig": "tsconfig.json",
+			"problemMatcher": [
+				"$tsc"
+			],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"label": "tsc: ビルド - tsconfig.json"
+		},
 	]
 }

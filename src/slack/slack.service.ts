@@ -44,7 +44,10 @@ export class SlackService {
         throw new Error(`Failed to send Slack message: ${response.data.error}`);
       }
     } catch (error) {
-      console.error('Error sending Slack message:', error);
+      console.error(
+        'Error sending Slack message:',
+        JSON.stringify(error, Object.getOwnPropertyNames(error), 2),
+      );
       throw new Error(`Failed to send Slack message: ${error.message}`);
     }
   }

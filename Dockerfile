@@ -1,6 +1,6 @@
 # ベースイメージ
 # FROM node:22.6.0
-FROM mcr.microsoft.com/playwright:v1.48.2-jammy
+FROM mcr.microsoft.com/playwright:v1.52.0-jammy
 
 ENV TZ=Asia/Tokyo
 
@@ -18,11 +18,20 @@ WORKDIR /app
 # パッケージをコピー
 COPY package*.json ./
 
-# 依存関係をインストール
-RUN npm install
-
 # xvfb をインストール
 RUN apt-get update && apt-get install -y xvfb
+
+# pwuserのホームディレクトリにdownloadsフォルダを作成
+RUN mkdir -p /home/pwuser/downloads && chown -R pwuser:pwuser /home/pwuser/downloads
+
+# pwuserに所有権を変更
+RUN chown -R pwuser:pwuser /app
+
+# pwuserで実行
+USER pwuser
+
+# 依存関係をインストール
+RUN npm install
 
 # アプリケーションコードをコピー
 COPY . .
