@@ -5,6 +5,7 @@ import { CatAlarmClockModule } from './cat-alarm-clock/cat-alarm-clock.module';
 import { FirestoreModule } from './firestore/firestore.module';
 import { CatWarningModule } from './cat-warning/cat-warning.module';
 import { SlackModule } from './slack/slack.module';
+import { AppController } from './app.controller';
 
 @Module({
   imports: [
@@ -22,7 +23,7 @@ import { SlackModule } from './slack/slack.module';
     CatWarningModule,
     SlackModule,
   ],
-  controllers: [],
+  controllers: [AppController],
   providers: [],
 })
 export class AppModule {}
