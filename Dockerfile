@@ -68,5 +68,7 @@ EXPOSE ${PORT}
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
   CMD curl -f http://localhost:${PORT}/health || exit 1
 
-# デフォルトコマンド
+# Playwrightで必要な仮想ディスプレイ環境をxvfbで提供
+# - 解像度: 1920x1080
+# - 色深度: 24bit
 CMD ["xvfb-run", "--server-args=-screen 0 1920x1080x24", "node", "dist/main"]

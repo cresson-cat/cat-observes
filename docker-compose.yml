@@ -15,4 +15,10 @@ services:
     env_file:
       - .env
       - .env.development.local
+    # 開発環境用：Dockerfile の CMD ["xvfb-run", "--server-args=-screen 0 1920x1080x24", "node", "dist/main"] を上書き
+    # 開発環境では Dockerfile の xvfb-run 不要：
+    # • ホストマシンのディスプレイが利用可
+    # • VSCode Dev Container が X11 フォワーディングをサポート
+    # • ホストとソースコードが同期（ホットリロード有効）
+    # • デバッグ機能が利用可能（ブレークポイント、ソースマップ等）
     command: npm run debug
