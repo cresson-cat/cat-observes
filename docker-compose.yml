@@ -3,9 +3,11 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    healthcheck:
+      disable: true
     ports:
       - "${PORT}:${PORT}"
-      - "9229:9229"
+      - "9229:9229" # Debugging port (Node.js)
     volumes:
       - .:/app
       - ./downloads:/home/pwuser/downloads
