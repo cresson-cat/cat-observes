@@ -9,92 +9,75 @@
 - [ ] アカウント毎に実行 Promise.all に変更
 - [ ] エンドポイントは nestjs のパイプ機能でチェックする
 
-<!--
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+---
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+## GKEへのデプロイ手順
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
--->
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+### 0. 前提条件
 
-<!--
-## Description
+- `gcloud` CLI がインストールされ、認証済みであること。
+- `kubectl` がインストール済みであること。
+- `docker` がインストール済みであること。
+- GCPサービスアカウントキー（例: `gcp-key.json`）が準備されていること。
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+### 1. GCPの事前準備
 
-## Project setup
+アプリケーションを動作させるためのGCPリソースを準備します。
+
+- **GKEクラスタの作成**: アプリケーションが動作するKubernetesクラスタを作成します。
+  ```bash
+  gcloud container clusters create cat-observes-cluster \
+    --zone asia-northeast1-a \
+    --num-nodes 1 \
+    --machine-type e2-small
+  ```
+- **Artifact Registryの有効化**: Dockerイメージを保存および管理するためのリポジトリを設定します。
+  ```bash
+  gcloud services enable artifactregistry.googleapis.com
+  ```
+
+### 2. Dockerイメージの準備とアップロード
+
+アプリケーションをGKEで利用可能なDockerイメージ形式に変換し、GCPにアップロードします。
+
+- **Dockerfileの最適化**: 本番環境向けにマルチステージビルドを活用し、イメージサイズを小さくします。
+- **Dockerイメージのビルド**: ローカルでDockerイメージをビルドします。
+  ```bash
+  docker build -t gcr.io/YOUR_PROJECT_ID/cat-observes:latest .
+  ```
+- **Artifact Registryへのプッシュ**: ビルドしたイメージにタグを付け、Artifact Registryへプッシュします。
+  ```bash
+  gcloud auth configure-docker asia-northeast1-docker.pkg.dev
+  docker push gcr.io/YOUR_PROJECT_ID/cat-observes:latest
+  ```
+
+### 3. Kubernetesマニフェストファイルの作成
+
+`docker-compose.yml`の内容を参考に、Kubernetesが理解できるマニフェストファイル（YAML形式）を作成します。
+
+- **Secret**: GCPサービスアカウントキーやSlackのトークンなど、秘匿情報を管理します。
+  ```bash
+  kubectl create secret generic gcp-key --from-file=gcp-key.json
+  ```
+- **ConfigMap**: ポート番号など、秘匿ではない設定値を管理します。
+- **Deployment**: どのDockerイメージを使い、Podをいくつ起動するかなどを定義します。SecretやConfigMapを環境変数やボリュームとしてコンテナに渡す設定もここで行います。
+- **Service**: `Deployment`で作成したPod群に対して、外部からアクセスするためのネットワーク（ロードバランサなど）を定義します。
+- **(オプション) CronJob**: 定期実行したいバッチ処理（例: `cat-in-ambush`）がある場合に作成します。
+
+### 4. GKEクラスタへのデプロイ
+
+作成したマニフェストファイルを`kubectl`コマンドでGKEクラスタに適用します。
 
 ```bash
-$ npm install
+kubectl apply -f <マニフェストファイルが格納されたディレクトリ>
 ```
 
-## Compile and run the project
+### 5. 動作確認
 
-```bash
-# development
-$ npm run start
+デプロイしたアプリケーションが正常に動作しているか確認します。
 
-# watch mode
-$ npm run start:dev
+- Podの起動状態を確認: `kubectl get pods`
+- Podのログを確認: `kubectl logs <pod-name>`
+- Serviceに割り当てられた外部IPアドレスにアクセスし、APIの応答を確認: `kubectl get service`
 
-# production mode
-$ npm run start:prod
-```
-
-## Run tests
-
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
-```
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
--->
+---
