@@ -14,7 +14,8 @@ services:
       - /Users/kanegadai/.ssh/gcp/cat-observes-1250b9d70c39.json:/app/gcp-key.json
     env_file:
       - .env
-      - .env.development.local
+      - .env.dev
+      - .env.dev.secret
     # 開発環境用：Dockerfile の CMD ["xvfb-run", "--server-args=-screen 0 1920x1080x24", "node", "dist/main"] を上書き
     # 開発環境では Dockerfile の xvfb-run 不要：
     # • ホストマシンのディスプレイが利用可
