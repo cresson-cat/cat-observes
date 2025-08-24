@@ -13,7 +13,7 @@ import { AppController } from './app.controller';
     ConfigModule.forRoot({
       envFilePath:
         process.env.NODE_ENV === 'development'
-          ? ['.env', '.env.development.local']
+          ? ['.env', '.env.dev', '.env.dev.secret']
           : ['.env'],
       ignoreEnvFile: process.env.NODE_ENV !== 'development', // development 環境以外では .env ファイルを無視（環境変数優先）
       isGlobal: true,
