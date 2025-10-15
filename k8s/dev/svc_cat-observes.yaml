@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: cat-observes
+  name: cat-observes
+spec:
+  ports:
+  - name: 80-3000
+    port: 80
+    protocol: TCP
+    targetPort: 3000
+  selector:
+    app: cat-observes
+  type: NodePort

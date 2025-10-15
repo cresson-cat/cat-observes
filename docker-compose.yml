@@ -11,7 +11,7 @@ services:
     volumes:
       - .:/app
       - ./downloads:/home/pwuser/downloads
-      - /Users/kanegadai/.ssh/gcp/cat-observes-1250b9d70c39.json:/app/gcp-key.json
+      - /Users/kanegadai/.ssh/gcp/cat-observes-1250b9d70c39.json:/app/secret/gcp-key.json
     env_file:
       - .env
       - .env.dev

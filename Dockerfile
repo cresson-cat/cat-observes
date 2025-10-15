@@ -71,4 +71,5 @@ HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
 # Playwrightで必要な仮想ディスプレイ環境をxvfbで提供
 # - 解像度: 1920x1080
 # - 色深度: 24bit
-CMD ["xvfb-run", "--server-args=-screen 0 1920x1080x24", "node", "dist/main"]
+CMD ["sh", "-c", "xvfb-run --server-args='-screen 0 1920x1080x24' node dist/main"]
+# CMD ["xvfb-run", "--server-args=-screen 0 1920x1080x24", "node", "dist/main"]

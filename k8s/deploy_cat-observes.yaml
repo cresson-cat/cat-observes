@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: cat-observes
+  name: cat-observes
+spec:
+  replicas: 1 # 本番は2以上が望ましい
+  selector:
+    matchLabels:
+      app: cat-observes
+  template:
+    metadata:
+      labels:
+        app: cat-observes
+    spec:
+      containers:
+      - name: cat-observes
+        image: gcr.io/cat-observes/cat-observes:latest
+        # explain imagePullPolicy
+        # - Always: 常にイメージをプルする (デフォルトはlatestタグの場合)
+        # - IfNotPresent: イメージが存在しない場合のみプルする
+        # - Never: イメージをプルしない 
+        imagePullPolicy: Always # IfNotPresent
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi # 128Mi
+          limits:
+            cpu: 375m
+            memory: 1Gi # 256Mi
+        envFrom:
+          - configMapRef:
+              name: app-config
+          - secretRef:
+              name: app-secret
+        volumeMounts:
+          - name: gcp-key-volume
+            mountPath: /app/secret
+            readOnly: true
+        ports:
+          - containerPort: 3000
+        # 死活監視
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 10
+          timeoutSeconds: 5
+          periodSeconds: 30
+        # トラフィックの疎通監視
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+      volumes:
+        - name: gcp-key-volume
+          secret:
+            secretName: gcp-key

@@ -1,0 +1,11 @@
+apiVersion: v1
+data:
+  CAT_OBSERVES_PJ_ID: cat-observes
+  DOWNLOAD_PATH: /home/pwuser/downloads
+  HEADLESS: "1"
+  NODE_ENV: development
+  PORT: "3000"
+  THRESHOLDS: 50000,10000
+kind: ConfigMap
+metadata:
+  name: app-config
