@@ -49,7 +49,9 @@
 - **Dockerfileの最適化**: 本番環境向けにマルチステージビルドを活用し、イメージサイズを小さくします
 - **Dockerイメージのビルド**: ローカルでDockerイメージをビルドします
   ```bash
-  docker build -t gcr.io/cat-observes/cat-observes:latest .
+  # 未指定の場合、プラットフォームが arm64（mac 向け） になる
+  # docker build -t gcr.io/cat-observes/cat-observes:latest .
+  docker build --platform linux/amd64 -t gcr.io/cat-observes/cat-observes:latest .
   ```
 - **Artifact Registryへのプッシュ**: ビルドしたイメージにタグを付け、Artifact Registryへプッシュします
   ```bash
@@ -69,13 +71,13 @@
 ##### Secretの作成手順（kubectlコマンド利用）
 
 ```bash
-kubectl create secret generic gcp-key --from-file=gcp-key.json
-kubectl create secret generic app-secret --from-file=.env.dev.secret
+kubectl create secret generic gcp-key --from-file=/Users/kanegadai/.ssh/gcp/cat-observes-+-+-+-+-+-+.json
+kubectl create secret generic app-secret --from-env-file=.env.dev.secret
 ```
 
 ##### Secretの内容をYAMLで管理する場合
 
-`secret-gcp-key.yaml` の例:
+`secret_gcp-key.yaml` の例:
 
 ```yaml
 apiVersion: v1
@@ -87,7 +89,7 @@ data:
   gcp-key.json: <base64エンコードした内容>
 ```
 
-`secret-app-secret.yaml` の例:
+`secret_app-secret.yaml` の例:
 
 ```yaml
 apiVersion: v1
@@ -96,7 +98,8 @@ metadata:
   name: app-secret
 type: Opaque
 data:
-  .env.dev.secret: <base64エンコードした内容>
+  GCP_KEY_FILE: <base64エンコードした内容>
+  SLACK_BOT_TOKEN: <base64エンコードした内容>
 ```
 
 YAMLから作成する場合:
@@ -124,10 +127,10 @@ spec:
                 name: app-secret
           env:
             - name: GCP_KEY_FILE
-              value: /app/gcp-key.json
+              value: /app/secret/gcp-key.json
           volumeMounts:
             - name: gcp-key-volume
-              mountPath: /app/gcp-key.json
+              mountPath: /app/secret/gcp-key.json
               subPath: gcp-key.json
       volumes:
         - name: gcp-key-volume
@@ -150,7 +153,7 @@ kubectl get secret app-secret -o yaml
 ##### ConfigMapの作成手順（kubectlコマンド利用）
 
 ```bash
-kubectl create configmap app-config --from-file=.env --from-file=.env.dev
+kubectl create configmap app-config --from-env-file=.env --from-env-file=.env.dev
 ```
 
 ##### ConfigMapの内容をYAMLで管理する場合
@@ -483,3 +486,7 @@ kubectl apply -f cronjob.yaml
 - Serviceに割り当てられた外部IPアドレスにアクセスし、APIの応答を確認: `kubectl get service`
 
 ---
+
+### 9. 参考情報
+
+[Web UI(Dashboard)](https://kubernetes.io/ja/docs/tasks/access-application-cluster/web-ui-dashboard/)
