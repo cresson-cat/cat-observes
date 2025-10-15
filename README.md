@@ -6,8 +6,10 @@
 
 ### TODO
 
+- [ ] 未使用のファイル（テスト関連等）の資材を削除
+- [ ] k8s の要素を別リポジトリにするか検討
 - [ ] アカウント毎に実行 Promise.all に変更
-- [ ] エンドポイントは nestjs のパイプ機能でチェックする
+- [ ] （エンドポイントは nestjs のパイプ機能でチェックする）
 
 ---
 
@@ -71,7 +73,7 @@
 ##### Secretの作成手順（kubectlコマンド利用）
 
 ```bash
-kubectl create secret generic gcp-key --from-file=/Users/kanegadai/.ssh/gcp/cat-observes-+-+-+-+-+-+.json
+kubectl create secret generic gcp-key --from-file=/Users/${USER}/.ssh/gcp/cat-observes-+-+-+-+-+-+.json
 kubectl create secret generic app-secret --from-env-file=.env.dev.secret
 ```
 

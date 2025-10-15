@@ -23,7 +23,7 @@ export class BankDownloadPage {
         .click();
 
       const download = await downloadPromise;
-      const fileName = path.join(downloadPath, download.suggestedFilename());      
+      const fileName = path.join(downloadPath, download.suggestedFilename());
       console.log(`Download started: ${fileName}`);
 
       await download.saveAs(fileName);

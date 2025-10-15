@@ -44,7 +44,9 @@ export class CatInAmbushService {
     const config = (() => {
       const canDebugBrowser = parseInt(this.configService.get('HEADLESS'));
       return {
-        beforeParthing: this.configService.get<string>('TARGETS'),
+        beforeParthing: this.configService
+          .get<string>('TARGETS')
+          .replace(/^'(.*)'$/, '$1'), // 先頭と末尾のシングルクォートを削除
         downloadPath: this.configService.get<string>('DOWNLOAD_PATH'),
         headless: isNaN(canDebugBrowser) ? true : !!canDebugBrowser,
       };
@@ -58,7 +60,7 @@ export class CatInAmbushService {
     });
     this.context = await this.browser.newContext();
     this.page = await this.context.newPage();
-    this.page.context().setDefaultTimeout(60000);
+    this.page.context().setDefaultTimeout(180000);
 
     const result: string[] = [];
     try {
@@ -71,7 +73,9 @@ export class CatInAmbushService {
 
       // Firestore関連のエラーを特定するための追加ログ
       if (error.code === 7) {
-        console.error('Permission denied. Check Firestore credentials and permissions.');
+        console.error(
+          'Permission denied. Check Firestore credentials and permissions.',
+        );
       }
 
       throw error; // エラーを再スローして呼び出し元に通知

@@ -60,3 +60,6 @@ node_modules/
 # service-account
 gcp-key.json
 downloads/*.csv
+
+# Snyk Security Extension - AI Rules (auto-generated)
+.github/instructions/snyk_rules.instructions.md

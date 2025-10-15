@@ -17,11 +17,7 @@ spec:
       containers:
       - name: cat-observes
         image: gcr.io/cat-observes/cat-observes:latest
-        # explain imagePullPolicy
-        # - Always: 常にイメージをプルする (デフォルトはlatestタグの場合)
-        # - IfNotPresent: イメージが存在しない場合のみプルする
-        # - Never: イメージをプルしない 
-        imagePullPolicy: Always # IfNotPresent
+        imagePullPolicy: Always # IfNotPresent: イメージが存在しない場合のみ pull
         resources:
           requests:
             cpu: 100m
