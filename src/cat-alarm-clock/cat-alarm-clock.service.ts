@@ -39,8 +39,10 @@ export class CatAlarmClockService {
     from(files)
       .pipe(
         concatMap((f) => {
+          const filePath = path.join(config.downloadPath, f);
+          console.log(`File path: ${filePath}`);
           const stream = fs
-            .createReadStream(path.join(config.downloadPath, f))
+            .createReadStream(filePath)
             .pipe(iconv.decodeStream('Shift_JIS'))
             .pipe(parser);
           // @note csv の各行をパースした stream を Observable に変換

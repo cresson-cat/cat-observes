@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { CatFoodDto } from 'src/models/dto/cat-food.model.dto';
-import { type Page } from 'playwright';
+import { type Page, type Response } from 'playwright';
 
 /**
  * Page Object Model - ログイン画面
@@ -8,7 +8,7 @@ import { type Page } from 'playwright';
 @Injectable()
 export class BankLoginPage {
   async navigateToLogin(preLoginPage: Page) {
-    await preLoginPage.goto('https://www.bk.mufg.jp/index.html');
+    await preLoginPage.goto('https://www.bk.mufg.jp/index.html', { waitUntil: 'domcontentloaded' });
     const pagePromise = preLoginPage.waitForEvent('popup');
     await preLoginPage
       .getByRole('link', {
