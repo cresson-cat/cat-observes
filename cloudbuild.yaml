@@ -1,0 +1,19 @@
+# cloudbuild.yaml
+# wakeup または tuckin を引数で指定できる Cloud Build 設定
+
+steps:
+  - name: gcr.io/cloud-builders/gcloud
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        echo "Executing target: ${_TARGET}"
+        make ${_TARGET}
+options:
+  logging: 'CLOUD_LOGGING_ONLY'
+
+# 実行時に Cloud Scheduler から substitutions で _TARGET を渡す
+substitutions:
+  _TARGET: "wakeup"
+
+timeout: 600s
