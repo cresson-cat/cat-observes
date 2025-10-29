@@ -1,0 +1,35 @@
+apiVersion: v1
+data:
+  kurumi-daily-run.sh: |
+    #!/bin/bash
+    # kurumi-daily-run.sh
+    # Description: This script runs the Kurumi daily tasks for all accounts.
+
+    set -uo pipefail
+
+    # APIのベースURL
+    API_BASE_URL="http://34.66.144.71"
+
+    # 1. ambush エンドポイントにPOSTリクエストを送信
+    echo "Step 1: Sending POST request to /ambush endpoint..."
+    response=$(curl --silent --location --request POST "${API_BASE_URL}/ambush")
+
+    # レスポンスからファイル名を抽出（JSON配列から文字列を抽出）
+    files=$(echo "${response}" | tr -d '[]"' | tr ',' ' ')
+
+    # 2. alarm-clock エンドポイントにPOSTリクエストを送信
+    echo "Step 2: Sending POST request to /alarm-clock endpoint..."
+    curl --silent --location "${API_BASE_URL}/alarm-clock" \
+        --header 'Content-Type: application/json' \
+        --data "{\"files\": [${response}]}"
+
+    # 3. cat-warning エンドポイントにPOSTリクエストを送信
+    echo "Step 3: Sending POST request to /cat-warning endpoint..."
+    curl --silent --location --request POST "${API_BASE_URL}/cat-warning"
+
+    echo
+    echo "Extracted files: ${files}"
+    echo "All steps completed successfully."
+kind: ConfigMap
+metadata:
+  name: kurumi-daily-run

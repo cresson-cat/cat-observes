@@ -1,0 +1,28 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: kurumi-daily-run
+spec:
+  jobTemplate:
+    metadata:
+      name: kurumi-daily-run
+    spec:
+      template:
+        spec:
+          containers:
+          - image: curlimages/curl:8.16.0
+            name: kurumi-daily-run
+            # ConfigMap の data.kurumi-daily-run.sh を指定
+            command: ["/bin/sh", "/scripts/kurumi-daily-run.sh"]
+            # scripts ディレクトリにスクリプトをマウント
+            volumeMounts:
+            - name: script-volume
+              mountPath: /scripts
+          restartPolicy: OnFailure
+          # ConfigMap をボリュームとしてマウント
+          volumes:
+          - name: script-volume
+            configMap:
+              name: kurumi-daily-run
+              defaultMode: 0755
+  schedule: 15 11 * * *
