@@ -46,10 +46,12 @@ export class CatWarningService {
 
       if (targetThreshold) {
         // Slack通知を送信
-        await this.slackService.sendSlackMessage(
+        return await this.slackService.sendSlackMessage(
           `残高が ¥${targetThreshold} より少ない.. 今 ¥${data.balance} にゃん！`,
         );
       }
+      // Normal completion log
+      console.log('No thresholds breached.');
     } catch (error) {
       console.error('Error sending Slack notification:', error);
       throw new Error(`Failed to send Slack notification: ${error.message}`);

@@ -8,7 +8,9 @@ import { type Page, type Response } from 'playwright';
 @Injectable()
 export class BankLoginPage {
   async navigateToLogin(preLoginPage: Page) {
-    await preLoginPage.goto('https://www.bk.mufg.jp/index.html', { waitUntil: 'domcontentloaded' });
+    await preLoginPage.goto('https://www.bk.mufg.jp/index.html', {
+      waitUntil: 'domcontentloaded',
+    });
     const pagePromise = preLoginPage.waitForEvent('popup');
     await preLoginPage
       .getByRole('link', {
