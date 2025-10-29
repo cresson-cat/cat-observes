@@ -21,7 +21,7 @@ data:
     echo "Step 2: Sending POST request to /alarm-clock endpoint..."
     curl --silent --location "${API_BASE_URL}/alarm-clock" \
         --header 'Content-Type: application/json' \
-        --data "{\"files\": [${response}]}"
+        --data "{\"files\": ${response}}"
 
     # 3. cat-warning エンドポイントにPOSTリクエストを送信
     echo "Step 3: Sending POST request to /cat-warning endpoint..."

@@ -18,11 +18,11 @@ spec:
             volumeMounts:
             - name: script-volume
               mountPath: /scripts
-          restartPolicy: OnFailure
           # ConfigMap をボリュームとしてマウント
           volumes:
           - name: script-volume
             configMap:
               name: kurumi-daily-run
               defaultMode: 0755
+          restartPolicy: OnFailure
   schedule: 15 11 * * *
