@@ -3,6 +3,7 @@ kind: CronJob
 metadata:
   name: kurumi-daily-run
 spec:
+  timeZone: "Asia/Tokyo"
   jobTemplate:
     metadata:
       name: kurumi-daily-run
