@@ -10,6 +10,7 @@ import { BankLoginPage } from './page-objects/bank-login-page';
 import { BankStatementPage } from './page-objects/bank-statement-page';
 import { BankLogoutPage } from './page-objects/bank-logout-page';
 import { BankDownloadPage } from './page-objects/bank-download-page';
+import { SlackService } from '../slack/slack.service';
 
 @Injectable()
 export class CatInAmbushService {
@@ -23,6 +24,7 @@ export class CatInAmbushService {
     private readonly statementPage: BankStatementPage,
     private readonly downloadPage: BankDownloadPage,
     private readonly logoutPage: BankLogoutPage,
+    private readonly slackService: SlackService,
   ) {}
 
   async onModuleDestroy() {
@@ -63,22 +65,26 @@ export class CatInAmbushService {
     this.page.context().setDefaultTimeout(180000);
 
     const result: string[] = [];
+    const totalTargets = targets.length;
+    let processedCount = 0;
+
     try {
       for (const target of targets) {
+        processedCount++;
         const name = `${await this.execute(target, config.downloadPath)}`;
         if (name) result.push(name);
       }
     } catch (error) {
-      console.error('Error during ambush execution:', error);
+      const errorMessage = `🚨 にゃっ — 処理エラー (${processedCount}/${totalTargets}件目)\n` +
+        `契約番号: ${targets[processedCount - 1].contractNum}\n` +
+        `支店名: ${targets[processedCount - 1].branchName}\n` +
+        `エラー内容: ${error.message}\n` +
+        (error.code === 7 ? '※ にゃ？ Firestoreの権限エラーの可能性があります\n' : '') +
+        `発生時刻: ${new Date().toLocaleString('ja-JP')}`;
 
-      // Firestore関連のエラーを特定するための追加ログ
-      if (error.code === 7) {
-        console.error(
-          'Permission denied. Check Firestore credentials and permissions.',
-        );
-      }
-
-      throw error; // エラーを再スローして呼び出し元に通知
+      console.error(errorMessage);
+      await this.slackService.sendSlackMessage(errorMessage);
+      throw error;
     } finally {
       await this.onModuleDestroy(); // リソース管理を統一
     }
@@ -111,18 +117,31 @@ export class CatInAmbushService {
   };
 
   private execute = async (target: CatFoodDto, downloadPath: string) => {
-    if (!this.page) throw new Error('Page is not initialized');
+    console.log(`[処理開始] 契約番号: ${target.contractNum}, 支店名: ${target.branchName}`);
 
+    if (!this.page) {
+      throw new Error('Page is not initialized');
+    }
+
+    console.log('ログインページに移動中...');
     const afterLogin = await this.loginPage.navigateToLogin(this.page);
+    
+    console.log('ログイン処理実行中...');
     await this.loginPage.login(afterLogin, target);
+
+    console.log('取引明細ダウンロードページに移動中...');
     await this.statementPage.navigateToStatementDownload(afterLogin, target);
 
+    console.log('明細データをダウンロード中...');
     const result = await this.downloadPage.downloadStatement(
       afterLogin,
       downloadPath,
     );
+
+    console.log('ログアウト処理実行中...');
     await this.logoutPage.logout(afterLogin);
 
+    console.log(`[処理完了] 契約番号: ${target.contractNum}`);
     return result;
   };
 }
