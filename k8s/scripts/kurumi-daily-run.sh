@@ -4,8 +4,13 @@
 
 set -uo pipefail
 
-# APIのベースURL
-API_BASE_URL="http://34.66.144.71"
+# APIのベースURL（クラスタ内DNSかつポート80を使用）
+# -----
+# ローカルPCから叩く場合: http://<node-ip ※>:30080
+# ※ node-ip: kubectl get nodes -o wide | tail -n 1 | awk '{ print $7 }'
+# 　 e.g. 疎通用の curl
+# 　 curl -I http://$(kubectl get nodes -o wide | tail -n 1 | awk '{ print $7 }'):30080/health
+API_BASE_URL="http://cat-observes-service"
 
 # 1. ambush エンドポイントにPOSTリクエストを送信
 echo "Step 1: Sending POST request to /ambush endpoint..."
