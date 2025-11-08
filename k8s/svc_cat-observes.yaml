@@ -3,10 +3,13 @@ kind: Service
 metadata:
   name: cat-observes-service
 spec:
-  type: LoadBalancer
+  type: NodePort # 外部に公開（簡易版。主に開発用）
+  # ClusterIP:     クラスター内部からのみアクセス可能
+  # LoadBalancer:  外部に公開（本番運用）.. 月あたり ¥2000-3000 かかる
   selector:
     app: cat-observes
   ports:
     - protocol: TCP
-      port: 80
-      targetPort: 3000
+      port: 80          # クラスター内からアクセスする際のポート
+      targetPort: 3000  # コンテナのポート
+      nodePort: 30080   # クラスター外からアクセスする際のポート（30000-32767）
