@@ -1,16 +1,17 @@
-NUM_NODES  := 1 # nodes の最大数（現在はコストへの配慮のため 1）
-NODE_POOL  := default-pool
-ZONE 			 := us-central1-a
-PROJECT_ID := cat-observes
+NUM_NODES     := 1 # nodes の最大数（現在はコストへの配慮のため 1）
+NODE_POOL     := default-pool
+ZONE          := us-central1-a
+PROJECT_ID    := cat-observes
+CLUSTER_NAME  := cat-observes-cluster
 
 # ノード数を 1 にする
 # オートスケーリングを on にする
 wakeup:
-	gcloud container node-pools update default-pool \
-		--cluster=cat-observes-cluster \
+	gcloud container node-pools update $(NODE_POOL) \
+		--cluster=$(CLUSTER_NAME) \
 		--zone=$(ZONE) \
 		--enable-autoscaling
-	gcloud container clusters resize cat-observes-cluster \
+	gcloud container clusters resize $(CLUSTER_NAME) \
 		--num-nodes=$(NUM_NODES) \
 		--node-pool=$(NODE_POOL) \
 		--zone=$(ZONE) \
@@ -20,11 +21,11 @@ wakeup:
 # ノード数を 0 にする
 # オートスケーリングを off にする
 tuckin:
-	gcloud container node-pools update default-pool \
-		--cluster=cat-observes-cluster \
+	gcloud container node-pools update $(NODE_POOL) \
+		--cluster=$(CLUSTER_NAME) \
 		--zone=$(ZONE) \
 		--no-enable-autoscaling
-	gcloud container clusters resize cat-observes-cluster \
+	gcloud container clusters resize $(CLUSTER_NAME) \
 		--num-nodes=0 \
 		--node-pool=$(NODE_POOL) \
 		--zone=$(ZONE) \

@@ -44,6 +44,22 @@
   ```bash
   gcloud services enable artifactregistry.googleapis.com
   ```
+- Node Pool の作成（必要に応じて。以下コマンドの内容は適宜変更のこと）
+  ```bash
+  # 作成
+  gcloud container node-pools create default-pool \
+    --cluster=cat-observes-cluster \
+    --disk-size=80GB \
+    --num-nodes=1 \
+    --machine-type=e2-medium \
+    --zone us-central1-a
+  
+  # 削除
+  gcloud container node-pools delete eco-disk-pool \
+    --cluster=cat-observes-cluster \
+    --zone us-central1-a
+  ```
+
 
 ### 2. Dockerイメージの準備とアップロード
 
