@@ -5,7 +5,7 @@ data:
   HEADLESS: "1"
   NODE_ENV: development
   PORT: "3000"
-  THRESHOLDS: 50000,10000
+  THRESHOLDS: 400000,300000
 kind: ConfigMap
 metadata:
   name: app-config
